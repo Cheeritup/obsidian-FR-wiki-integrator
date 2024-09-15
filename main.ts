@@ -8,21 +8,25 @@ import {
 	PluginSettingTab,
 	Setting,
 } from "obsidian";
+import { parseArticle } from "./Project.js";
+import { ensureQuickLinksSupport } from "./functions.js";
 
 // Remember to rename these classes and interfaces!
 
-interface FRWikiIntegrationPluginSettings {
+interface FRWIntegrationPluginSettings {
 	mySetting: string;
 }
 
-const DEFAULT_SETTINGS: FRWikiIntegrationPluginSettings = {
+const DEFAULT_SETTINGS: FRWIntegrationPluginSettings = {
 	mySetting: "default",
 };
 
-export default class FRWikiIntegrationPlugin extends Plugin {
-	settings: FRWikiIntegrationPluginSettings;
+export default class FRWIntegrationPlugin extends Plugin {
+	settings: FRWIntegrationPluginSettings;
 
 	async onload() {
+		// Quicklinks prefix check
+		ensureQuickLinksSupport(); //link to the data.json file, and make sure it saves the return value to the array
 		await this.loadSettings();
 		// This shows a greeting notice.
 		this.addRibbonIcon("dice", "Greet", () => {
@@ -35,7 +39,7 @@ export default class FRWikiIntegrationPlugin extends Plugin {
 			"Sample Plugin",
 			(evt: MouseEvent) => {
 				// Called when the user clicks the icon.
-				new Notice("This is a notice!");
+				new Notice("This ensures the plugin is loaded");
 			}
 		);
 		// Perform additional things with the ribbon
@@ -60,6 +64,16 @@ export default class FRWikiIntegrationPlugin extends Plugin {
 			editorCallback: (editor: Editor, view: MarkdownView) => {
 				console.log(editor.getSelection());
 				editor.replaceSelection("Sample Editor Command");
+			},
+		});
+		// Actual function run
+		this.addCommand({
+			id: "frw-integration-command",
+			name: "FRW Integration Command",
+			editorCallback: (editor: Editor, view: MarkdownView) => {
+				const selection = editor.getSelection();
+				console.log(selection);
+				editor.replaceSelection(parseArticle(selection));
 			},
 		});
 		// This adds a complex command that can check whether the current state of the app allows execution of the command
@@ -130,9 +144,9 @@ class SampleModal extends Modal {
 }
 
 class SampleSettingTab extends PluginSettingTab {
-	plugin: FRWikiIntegrationPlugin;
+	plugin: FRWIntegrationPlugin;
 
-	constructor(app: App, plugin: FRWikiIntegrationPlugin) {
+	constructor(app: App, plugin: FRWIntegrationPlugin) {
 		super(app, plugin);
 		this.plugin = plugin;
 	}
