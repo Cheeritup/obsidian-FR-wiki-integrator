@@ -8,8 +8,8 @@ import {
 	PluginSettingTab,
 	Setting,
 } from "obsidian";
-import { parseArticle } from "./Project.js";
-import { ensureQuickLinksSupport } from "./functions.js";
+import { parseArticle } from "./Project";
+import { ensureQuickLinksSupport } from "./functions";
 
 // Remember to rename these classes and interfaces!
 
@@ -25,14 +25,15 @@ export default class FRWIntegrationPlugin extends Plugin {
 	settings: FRWIntegrationPluginSettings;
 
 	async onload() {
+		new Notice("FRW Integration Plugin starting up.");
 		// Quicklinks prefix check
-		ensureQuickLinksSupport(); //link to the data.json file, and make sure it saves the return value to the array
+		const quickLinksSupport = await ensureQuickLinksSupport(this.app);
 		await this.loadSettings();
 		// This shows a greeting notice.
 		this.addRibbonIcon("dice", "Greet", () => {
 			new Notice("Hello, user!");
 		});
-
+		// This adds an editor command that can perform some operation on the current editor instance
 		// This creates an icon in the left ribbon.
 		const ribbonIconEl = this.addRibbonIcon(
 			"dice",

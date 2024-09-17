@@ -4,9 +4,7 @@
     "inlineSourceMap": true,
     "inlineSources": true,
     "module": "ESNext",
-    "target": "ES6",
-    "allowJs": true,
-    "strict": true,
+    "target": "ES2018",
     "noImplicitAny": true,
     "moduleResolution": "node",
     "importHelpers": true,
@@ -16,7 +14,11 @@
       "DOM",
       "ES5",
       "ES6",
-      "ES7"
+      "ES7",
+      "ES2021"
+    ],
+    "types": [
+      "obsidian-typings"
     ]
   },
   "include": [
