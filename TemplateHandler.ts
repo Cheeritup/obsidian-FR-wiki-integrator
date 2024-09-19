@@ -1,7 +1,7 @@
 import * as _ from "lodash";
 export interface PropertyData {
 	name: string;
-	value: string | string[];
+	value: string | string[]; // might not be possible for it to be an array
 }
 export interface BuildData {
 	content: string;
@@ -21,7 +21,7 @@ export class TemplateHandler {
 	public getTemplate(properties: PropertyData[]) {
 		const propertyNames = new Set(properties.map((prop) => prop.name));
 		return this.buildData.reduce((acc, step) => {
-			const reqArray = _.toArray(step.requiredProperties ?? []);
+			const reqArray = _.castArray(step.requiredProperties ?? []);
 			if (reqArray.every((required) => propertyNames.has(required))) {
 				return acc + step.content;
 			}
