@@ -1,5 +1,6 @@
 const fs = require("fs");
 
+import { template } from "lodash";
 import { PropertyData } from "TemplateHandler";
 
 const example = fs.readFileSync("./example.txt").toString();
@@ -19,17 +20,27 @@ function fixTags(article: string) {
 	);
 }
 
-//curly braces fixer (quote fixer,percentage table) !!unfinished!!
-//TODO: return template name
-function fixCurlyBraces(article: string) {
+// removes unneccesary {} tags, also returns the template name
+//TODO: add quote fixer,percentage table
+function fixCurlyBraces(article: string): {
+	result: string;
+	templateName: string;
+} {
 	const regexp = /{{(?<name>[/a-zA-Z0-9]*)(?<content>[^\n]*)}}\n/g;
-	return (
-		// change replaceAll parameter to function insead of string for specific cases
+	// change replaceAll parameter to function insead of string for specific cases
+	let templateName: string = ""
+	const result =
 		article
 			.replaceAll(regexp, "")
-			.replace(/^{{.*\n/, "")
-			.replace(/^}}$\n/m, "")
-	);
+			.replace(
+				/^{{(?<template>.*)\n/,
+				function replacer(match, template: string) {
+					templateName = template
+					return "";
+				}
+			)
+			.replace(/^}}$\n/m, "");
+	return { result, templateName };
 }
 const unsupportedProperties = ["allignment"];
 const unsupportedPropertyValues = ["yes", "no"];
@@ -109,9 +120,8 @@ function fixLinks(article: string) {
 export const parseArticle = function (article: string) {
 	let result = article.replace(/\r/g, "");
 	result = fixTags(result);
-	result = fixCurlyBraces(result);
+	result = fixCurlyBraces(result).result;
 	result = fixProperties(result).result;
-	console.log(fixProperties(example).propertyData);
 	result = fixHeadings(result);
 	result = fixLinks(result);
 	return result;
