@@ -23,3 +23,6 @@ data.json
 
 # Exclude example file for debugging
 example.txt
+
+# Exclude js files for internal debugging
+Project.js
