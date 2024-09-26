@@ -1,4 +1,4 @@
-# Obsidian Sample Plugin
+# FR Wiki Integration Plugin
 
 This is a sample plugin for Obsidian (https://obsidian.md).
 

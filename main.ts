@@ -10,6 +10,7 @@ import {
 } from "obsidian";
 import { parseArticle } from "./Project";
 import { ensureQuickLinksSupport } from "./functions";
+import { locationTemplateHandler } from "LocationTemplateHandler";
 
 // Remember to rename these classes and interfaces!
 
@@ -30,8 +31,12 @@ export default class FRWIntegrationPlugin extends Plugin {
 		const quickLinksSupport = await ensureQuickLinksSupport(this.app);
 		await this.loadSettings();
 		// This shows a greeting notice.
-		this.addRibbonIcon("dice", "Greet", () => {
-			new Notice("Hello, user!");
+		this.addRibbonIcon("dice", "Test button", () => {
+			const result = locationTemplateHandler.getTemplate([
+				{ name: "aliases", value: "" },
+				{ name: "races", value: "" },
+			]);
+			new Notice(result);
 		});
 		// This adds an editor command that can perform some operation on the current editor instance
 		// This creates an icon in the left ribbon.
