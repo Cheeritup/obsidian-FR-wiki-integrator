@@ -5,6 +5,8 @@
 	"main": "main.js",
 	"scripts": {
 		"dev": "node esbuild.config.mjs",
+		"test": "tsx runExample.ts",
+		"debug": "tsx ",
 		"build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
 		"version": "node version-bump.mjs && git add manifest.json versions.json"
 	},
@@ -24,6 +26,8 @@
 	},
 	"dependencies": {
 		"@types/lodash": "^4.17.7",
-		"lodash": "^4.17.21"
-	}
+		"lodash": "^4.17.21",
+		"tsx": "^4.19.1"
+	},
+	"type": "module"
 }
