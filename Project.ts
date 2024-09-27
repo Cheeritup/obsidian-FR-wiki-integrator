@@ -1,11 +1,10 @@
-const fs = require("fs");
-
-import { template } from "lodash";
-import { PropertyData } from "TemplateHandler";
-
-const example = fs.readFileSync("./example.txt").toString();
+import { PropertyData } from "TemplateBuilder/TemplateHandler";
 type CaptureValue = string;
-//text cleaner: remove tags
+
+//const fs = require("fs");
+//const example = fs.readFileSync("./example.txt").toString();
+
+//remove <> tags
 function fixTags(article: string) {
 	const regexp =
 		/<(?<tag>[a-zA-Z]{1,20})(?:(?:.|\s)*?)(?:(?:<\/(?<closingTag>[a-zA-Z]{1,20})>)|(?:\/>))/g;
@@ -20,32 +19,29 @@ function fixTags(article: string) {
 	);
 }
 
-// removes unneccesary {} tags, also returns the template name
-//TODO: add quote fixer,percentage table
+// removes unneccesary {} tags(result), also returns the template name(templateName)
 function fixCurlyBraces(article: string): {
 	result: string;
 	templateName: string;
 } {
 	const regexp = /{{(?<name>[/a-zA-Z0-9]*)(?<content>[^\n]*)}}\n/g;
-	// change replaceAll parameter to function insead of string for specific cases
-	let templateName: string = ""
-	const result =
-		article
-			.replaceAll(regexp, "")
-			.replace(
-				/^{{(?<template>.*)\n/,
-				function replacer(match, template: string) {
-					templateName = template
-					return "";
-				}
-			)
-			.replace(/^}}$\n/m, "");
+	let templateName: string = "";
+	const result = article
+		.replaceAll(regexp, "")
+		.replace(
+			/^{{(?<template>.*)\n/,
+			function replacer(match, template: string) {
+				templateName = template;
+				return "";
+			}
+		)
+		.replace(/^}}$\n/m, "");
 	return { result, templateName };
 }
+
 const unsupportedProperties = ["allignment"];
-const unsupportedPropertyValues = ["yes", "no"];
-// removes empty properties and reformats properties into "name:value" (result)
-// returns an array with PropertyData
+const unsupportedPropertyValues = ["yes", "no"]; // consider allowing "yes" to allow sorting by linking into categories
+// Reformats properties (result) and outputs properties as useable data(PropertyData[])
 function fixProperties(article: string): {
 	result: string;
 	propertyData: PropertyData[];
@@ -61,28 +57,36 @@ function fixProperties(article: string): {
 	let result = article.replace(
 		regexp,
 		function replacer(match, name: CaptureValue, value: CaptureValue) {
+			//should eventually be refactored
 			matchIndex += 1;
+			if (value) {
+				name = name.replaceAll(" ", "_"); // replaces spaces in the name with underscore
+			}
 			if (
 				!value ||
 				unsupportedProperties.includes(name) ||
 				unsupportedPropertyValues.includes(value)
 			) {
+				if (value) {
+					propertyData.push({ name, value });
+				}
 				let result = "";
 				if (matchIndex === totalMatches) {
 					result += "---\n";
 				}
 				return result;
 			}
-			let currentPair: PropertyData = { name, value };
-			propertyData.push(currentPair);
 			const value_split = value.split(", ");
 			if (value_split.length === 1) {
+				propertyData.push({ name, value });
 				let result = `${name}: ${value}\n`;
 				if (matchIndex === totalMatches) {
 					result += "---\n";
 				}
 				return result;
 			}
+			// If more than one value:
+			propertyData.push({ name, value: value_split });
 			const multiline = value_split.map(function (value) {
 				return `  - ${value}`;
 			});
@@ -127,4 +131,4 @@ export const parseArticle = function (article: string) {
 	return result;
 };
 //console.log(parseArticle(example));
-parseArticle(example);
+//parseArticle(example);
