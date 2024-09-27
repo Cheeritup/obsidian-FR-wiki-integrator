@@ -1,10 +1,5 @@
 import * as _ from "lodash";
 import { TemplateSegment } from "./TemplateSegment";
-import { ConstantTemplateSegment } from "./ConstantTemplateSegment";
-import { InfoboxTitleTemplateSegment } from "./InfoboxTitleTemplateSegment";
-import { SectionTemplateSegment } from "./SectionTemplateSegment";
-import { SectionEntryTemplateSegment } from "./SectionEntryTemplateSegment";
-import { LinksTemplateSegment } from "./LinkTemplateSegment";
 export interface PropertyData {
 	name: string;
 	value: string | string[]; // might not be possible for it to be an array
