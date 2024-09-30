@@ -41,7 +41,7 @@ export class InfoboxTemplateHandler extends TemplateHandler {
 	}
 }
 
-const locationTemplateHandler = new InfoboxTemplateHandler("Location", [
+export const locationTemplateHandler = new InfoboxTemplateHandler("Location", [
 	new SectionTemplateSegment("Geography", [
 		new SectionEntryTemplateSegment("Alt Spelling", "alt_spelling"),
 		new SectionEntryTemplateSegment("Aliases"),

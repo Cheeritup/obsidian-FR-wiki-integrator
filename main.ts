@@ -10,7 +10,7 @@ import {
 } from "obsidian";
 import { parseArticle } from "./Project";
 import { ensureQuickLinksSupport } from "./functions";
-import { locationTemplateHandler } from "LocationTemplateHandler";
+import { locationTemplateHandler } from "TemplateBuilder/InfoboxTemplateHandler";
 
 // Remember to rename these classes and interfaces!
 
@@ -30,15 +30,10 @@ export default class FRWIntegrationPlugin extends Plugin {
 		// Quicklinks prefix check
 		const quickLinksSupport = await ensureQuickLinksSupport(this.app);
 		await this.loadSettings();
-		// This shows a greeting notice.
 		this.addRibbonIcon("dice", "Test button", () => {
-			const result = locationTemplateHandler.getTemplate([
-				{ name: "aliases", value: "" },
-				{ name: "races", value: "" },
-			]);
+			const result = "test";
 			new Notice(result);
 		});
-		// This adds an editor command that can perform some operation on the current editor instance
 		// This creates an icon in the left ribbon.
 		const ribbonIconEl = this.addRibbonIcon(
 			"dice",
@@ -72,14 +67,22 @@ export default class FRWIntegrationPlugin extends Plugin {
 				editor.replaceSelection("Sample Editor Command");
 			},
 		});
-		// Actual function run
+		// Actual function, integrates an article's source code into the editor
 		this.addCommand({
 			id: "frw-integration-command",
 			name: "FRW Integration Command",
 			editorCallback: (editor: Editor, view: MarkdownView) => {
-				const selection = editor.getSelection();
-				console.log(selection);
-				editor.replaceSelection(parseArticle(selection));
+				try {
+					const article = parseArticle(editor.getSelection());
+					editor.replaceSelection(article);
+				} catch (error) {
+					if (error instanceof Error) {
+						console.error(`${error.name}: ${error.message}`);
+					} else console.error(error);
+					new Notice(
+						`${error.name}\nCommand failed. Check console for more details.`
+					);
+				}
 			},
 		});
 		// This adds a complex command that can check whether the current state of the app allows execution of the command
