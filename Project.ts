@@ -1,8 +1,13 @@
 import { PropertyData } from "TemplateBuilder/TemplateHandler";
+import { locationTemplateHandler } from "./TemplateBuilder/InfoboxTemplateHandler";
+import * as fs from "fs";
 type CaptureValue = string;
 
-//const fs = require("fs");
-//const example = fs.readFileSync("./example.txt").toString();
+function writeFile(body: string, phase: string, num: number) {
+	if (process.env.DEBUG) {
+		fs.writeFileSync(`./output/article.${num}_${phase}.txt`, body);
+	}
+}
 
 //remove <> tags
 function fixTags(article: string) {
@@ -24,7 +29,7 @@ function fixCurlyBraces(article: string): {
 	result: string;
 	templateName: string;
 } {
-	const regexp = /{{(?<name>[/a-zA-Z0-9]*)(?<content>[^\n]*)}}\n/g;
+	const regexp = /{{(?<name>[/a-zA-Z0-9]*)(?<content>[^\n]*)}}\n/g; //does not remove {{}} in the middle of lines to support future implementations (quotes/cites)
 	let templateName: string = "";
 	const result = article
 		.replaceAll(regexp, "")
@@ -35,21 +40,23 @@ function fixCurlyBraces(article: string): {
 				return "";
 			}
 		)
-		.replace(/^}}$\n/m, "");
+		.replace(/^}}$\n/m, "")
+		.replace(/^}}/m, "");
 	return { result, templateName };
 }
 
 const unsupportedProperties = ["allignment"];
 const unsupportedPropertyValues = ["yes", "no"]; // consider allowing "yes" to allow sorting by linking into categories
-// Reformats properties (result) and outputs properties as useable data(PropertyData[])
+// Reformats properties (properties, body) and outputs properties as useable data(PropertyData[])
 function fixProperties(article: string): {
-	result: string;
+	body: string;
+	properties: string;
 	propertyData: PropertyData[];
 } {
 	const regexp = /^\|\s(?<name>.*?)\s+=\s(?<value>.*?)\s*$\n/gm;
 	const match = article.match(regexp);
 	if (!match) {
-		return { result: article, propertyData: [] };
+		return { body: article, properties: "", propertyData: [] };
 	}
 	const totalMatches = match.length;
 	let matchIndex = 0;
@@ -90,22 +97,36 @@ function fixProperties(article: string): {
 			const multiline = value_split.map(function (value) {
 				return `  - ${value}`;
 			});
-			let result = `${name}:\n${multiline.join("\n")}`;
+			let result = `${name}:\n${multiline.join("\n")}\n`;
 			if (matchIndex === totalMatches) {
 				result += "---\n";
 			}
 			return result;
 		}
 	);
-	result = `---\nobsidianUIMode: preview\n${result}`;
+	const propertyResult = `---\nobsidianUIMode: preview\n${result}`; //TODO: decide on preferred UI mode
+	const formatRegexp: RegExp =
+		/(?<Properties>^(?:---\n){1}(?:.*\n)*---\n)(?<Body>(?:.|\n)*)/m;
+	const formatMatch = propertyResult.match(formatRegexp);
+	let body: string = "";
+	let properties: string = "";
+	if (!formatMatch) {
+		console.log(
+			"Error: properties formatter failed to match body and properties"
+		);
+		return { body: propertyResult, properties: "", propertyData };
+	}
+	if (formatMatch && formatMatch.groups) {
+		body = formatMatch?.groups.Body;
+		properties = formatMatch?.groups.Properties;
+	}
 	return {
-		result,
+		body,
+		properties,
 		propertyData,
 	};
-}
-
-// fixes heading formating, i.e =content= -> #content
-function fixHeadings(article: string) {
+}// fixes heading formating, i.e =content= -> #contentfunction fixHeadings(article: string) {
+	function fixHeadings(article: string) {
 	const regexp = /(?<start>^=+)(?<content>.+?)(?:=+$)/gm;
 	return article.replaceAll(regexp, function replacer(match, start, content) {
 		return `${start.replaceAll("=", "#")} ${content}`;
@@ -122,13 +143,24 @@ function fixLinks(article: string) {
 }
 
 export const parseArticle = function (article: string) {
-	let result = article.replace(/\r/g, "");
-	result = fixTags(result);
-	result = fixCurlyBraces(result).result;
-	result = fixProperties(result).result;
-	result = fixHeadings(result);
-	result = fixLinks(result);
+	let body = article.replace(/\r/g, "");
+	body = fixTags(body);
+	writeFile(body, "tags", 1);
+	body = fixCurlyBraces(body).result;
+	writeFile(body, "braces", 2);
+	const {
+		body: propertyBody,
+		properties,
+		propertyData,
+	} = fixProperties(body);
+	body = propertyBody;
+	writeFile(body, "properties", 3);
+	body = fixHeadings(body);
+	writeFile(body, "headings", 4);
+	body = fixLinks(body);
+	writeFile(body, "links", 5);
+	const template = locationTemplateHandler.getTemplate(propertyData);
+	const result = `${properties}\n${template}\n${body}`;
+	writeFile(result, "final", 6);
 	return result;
 };
-//console.log(parseArticle(example));
-//parseArticle(example);
