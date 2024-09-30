@@ -7,7 +7,7 @@ export class SectionTemplateSegment extends TemplateSegment {
 
 	constructor(name: string, entries: SectionEntryTemplateSegment[]) {
 		super();
-		this.name;
+		this.name = name;
 		this.entries = entries;
 	}
 
