@@ -7,11 +7,10 @@ import {
 	Plugin,
 	PluginSettingTab,
 	Setting,
+	TFile,
 } from "obsidian";
 import { parseArticle } from "./Project";
 import { ensureQuickLinksSupport } from "./functions";
-import { locationTemplateHandler } from "TemplateBuilder/InfoboxTemplateHandler";
-
 // Remember to rename these classes and interfaces!
 
 interface FRWIntegrationPluginSettings {
@@ -71,17 +70,26 @@ export default class FRWIntegrationPlugin extends Plugin {
 		this.addCommand({
 			id: "frw-integration-command",
 			name: "FRW Integration Command",
-			editorCallback: (editor: Editor, view: MarkdownView) => {
+			editorCallback: async (editor: Editor, view: MarkdownView) => {
 				try {
 					const article = parseArticle(editor.getSelection());
-					editor.replaceSelection(article);
+					editor.replaceSelection(article.parsedArticle);
+					const currentNote =
+						this.app.workspace.getActiveFile() as TFile;
+					// there might be some unexpected behaviour with certain file types..?
+					const newPath = currentNote.path.replace(
+						`${currentNote.basename}.${currentNote.extension}`,
+						`${article.title}.${currentNote.extension}`
+					);
+					console.log(newPath);
+					this.app.fileManager.renameFile(currentNote, newPath);
 				} catch (error) {
+					new Notice(
+						`${error.name}\nError Occured. Check dev console for more details.`
+					);
 					if (error instanceof Error) {
 						console.error(`${error.name}: ${error.message}`);
 					} else console.error(error);
-					new Notice(
-						`${error.name}\nCommand failed. Check console for more details.`
-					);
 				}
 			},
 		});

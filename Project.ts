@@ -1,14 +1,24 @@
 import { PropertyData } from "TemplateBuilder/TemplateHandler";
 import { locationTemplateHandler } from "./TemplateBuilder/InfoboxTemplateHandler";
 import * as fs from "fs";
+import { Notice } from "obsidian";
 type CaptureValue = string;
-
 function writeFile(body: string, phase: string, num: number) {
 	if (process.env.DEBUG) {
 		fs.writeFileSync(`./output/article.${num}_${phase}.txt`, body);
 	}
 }
-
+//gets Title
+function getTitle(article: string) {
+	const match = article.match(/'''(?<Title>.*?)'''/);
+	if (!match) {
+		console.error(
+			`Error: regexp /'''(?<Title>.*?)'''/ failed to match "Title".`
+		);
+		new Notice("Failed fetching name. see dev console for more details");
+	}
+	return match?.groups?.Title ?? "untitled";
+}
 //remove <> tags
 function fixTags(article: string) {
 	const regexp =
@@ -125,8 +135,8 @@ function fixProperties(article: string): {
 		properties,
 		propertyData,
 	};
-}// fixes heading formating, i.e =content= -> #contentfunction fixHeadings(article: string) {
-	function fixHeadings(article: string) {
+} // fixes heading formating, i.e =content= -> #contentfunction fixHeadings(article: string) {
+function fixHeadings(article: string) {
 	const regexp = /(?<start>^=+)(?<content>.+?)(?:=+$)/gm;
 	return article.replaceAll(regexp, function replacer(match, start, content) {
 		return `${start.replaceAll("=", "#")} ${content}`;
@@ -142,7 +152,10 @@ function fixLinks(article: string) {
 	});
 }
 
-export const parseArticle = function (article: string) {
+export const parseArticle = function (article: string): {
+	parsedArticle: string;
+	title: string;
+} {
 	let body = article.replace(/\r/g, "");
 	body = fixTags(body);
 	writeFile(body, "tags", 1);
@@ -162,5 +175,5 @@ export const parseArticle = function (article: string) {
 	const template = locationTemplateHandler.getTemplate(propertyData);
 	const result = `${properties}\n${template}\n${body}`;
 	writeFile(result, "final", 6);
-	return result;
+	return { parsedArticle: result, title: getTitle(article) };
 };
