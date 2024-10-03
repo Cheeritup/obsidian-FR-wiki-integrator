@@ -2,6 +2,7 @@ import { PropertyData } from "TemplateBuilder/TemplateHandler";
 import { locationTemplateHandler } from "./TemplateBuilder/InfoboxTemplateHandler";
 import * as fs from "fs";
 import { Notice } from "obsidian";
+import { getTemplateFromName } from "./TemplateHandlerIterator";
 type CaptureValue = string;
 function writeFile(body: string, phase: string, num: number) {
 	if (process.env.DEBUG) {
@@ -135,7 +136,7 @@ function fixProperties(article: string): {
 		properties,
 		propertyData,
 	};
-} // fixes heading formating, i.e =content= -> #contentfunction fixHeadings(article: string) {
+} // fixes heading formating, i.e =content= -> #content
 function fixHeadings(article: string) {
 	const regexp = /(?<start>^=+)(?<content>.+?)(?:=+$)/gm;
 	return article.replaceAll(regexp, function replacer(match, start, content) {
@@ -157,10 +158,17 @@ export const parseArticle = function (article: string): {
 	title: string;
 } {
 	let body = article.replace(/\r/g, "");
+	//Fix tags:
 	body = fixTags(body);
 	writeFile(body, "tags", 1);
-	body = fixCurlyBraces(body).result;
+	//Fix curly braces:
+	const {
+		result: fxbResult,
+		templateName
+	} = fixCurlyBraces(body);
+	body = fxbResult;
 	writeFile(body, "braces", 2);
+	//Fix properties:
 	const {
 		body: propertyBody,
 		properties,
@@ -168,11 +176,15 @@ export const parseArticle = function (article: string): {
 	} = fixProperties(body);
 	body = propertyBody;
 	writeFile(body, "properties", 3);
+	//Fix headings:
 	body = fixHeadings(body);
 	writeFile(body, "headings", 4);
+	//Fix links:
 	body = fixLinks(body);
 	writeFile(body, "links", 5);
-	const template = locationTemplateHandler.getTemplate(propertyData);
+	//Template checking:
+	const template = getTemplateFromName(templateName, propertyData);
+	//Final ordering:
 	const result = `${properties}\n${template}\n${body}`;
 	writeFile(result, "final", 6);
 	return { parsedArticle: result, title: getTitle(article) };

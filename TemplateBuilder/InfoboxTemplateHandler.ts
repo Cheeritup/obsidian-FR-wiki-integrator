@@ -101,7 +101,7 @@ export const locationTemplateHandler = new InfoboxTemplateHandler("Location", [
 		new SectionEntryTemplateSegment("Ruler Table", "rulertable"),
 	]),
 ]);
-
+//import data from json
 InfoboxTemplateHandler.generateFromData([
 	{
 		name: "Geography",
