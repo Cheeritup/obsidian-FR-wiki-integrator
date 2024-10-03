@@ -72,16 +72,16 @@ export default class FRWIntegrationPlugin extends Plugin {
 			name: "FRW Integration Command",
 			editorCallback: async (editor: Editor, view: MarkdownView) => {
 				try {
+					//Replacement of text:
 					const article = parseArticle(editor.getSelection());
 					editor.replaceSelection(article.parsedArticle);
+					//Renaming file:
 					const currentNote =
 						this.app.workspace.getActiveFile() as TFile;
-					// there might be some unexpected behaviour with certain file types..?
 					const newPath = currentNote.path.replace(
 						`${currentNote.basename}.${currentNote.extension}`,
 						`${article.title}.${currentNote.extension}`
 					);
-					console.log(newPath);
 					this.app.fileManager.renameFile(currentNote, newPath);
 				} catch (error) {
 					new Notice(
