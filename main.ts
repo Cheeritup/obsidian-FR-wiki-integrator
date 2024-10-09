@@ -31,7 +31,7 @@ export default class FRWIntegrationPlugin extends Plugin {
 		// This creates an icon in the left ribbon.
 		const ribbonIconEl = this.addRibbonIcon(
 			"dice",
-			"FRW Integrator Test",
+			"FR Wiki Integrator Test",
 			(evt: MouseEvent) => {
 				// Called when the user clicks the icon.
 				new Notice("This ensures the plugin is loaded for debugging.");
@@ -40,8 +40,7 @@ export default class FRWIntegrationPlugin extends Plugin {
 		// Actual function, integrates an article's source code into the editor
 		this.addCommand({
 			id: "frw-integration-command",
-			name: "Forgotten Realms Wiki Article Fix(selection)",
-
+			name: "Fix Source Code",
 			editorCallback: async (editor: Editor, view: MarkdownView) => {
 				try {
 					//Replacement of text:
@@ -127,7 +126,9 @@ class SampleSettingTab extends PluginSettingTab {
 
 		new Setting(containerEl)
 			.setName("Add Category Support")
-			.setDesc("Manually add support for new categories. Yet to be implemented fully.")
+			.setDesc(
+				"Manually add support for new categories. Yet to be implemented fully."
+			)
 			.addText((text) =>
 				text
 					.setPlaceholder("Enter your secret")
