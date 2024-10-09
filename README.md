@@ -21,7 +21,7 @@ You also must be using the ITS Theme. (for now)
 
 -In your BRAT settings inside of Obsidian click on "Add Beta Plugin" and paste the repository link(https://github.com/Cheeritup/obsidian-FR-wiki-integrator) click "Add Plugin".
 ## Usage
--Go to a desired Forgotten Realms Wiki(https://forgottenrealms.fandom.com/wiki/Main_Page) article, click on the "Edit" button on the top right. After it is done loading click on the newly appeared "Visual Editor" button and change into "Source Editing".
+Go to a desired Forgotten Realms Wiki(https://forgottenrealms.fandom.com/wiki/Main_Page) article, click on the "Edit" button on the top right. After it is done loading click on the newly appeared "Visual Editor" button and change into "Source Editing".
 
 Copy and paste all of the source code into an empty note in your vault. Make sure you're in markdown view and select all of the source code with CTRL+A, then using either a hotkey or the command pallete run the command "Fix Source Code".
 
