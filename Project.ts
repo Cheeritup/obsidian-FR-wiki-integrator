@@ -55,7 +55,22 @@ function fixCurlyBraces(article: string): {
 		.replace(/^}}/m, "");
 	return { result, templateName };
 }
-
+//makes sure there is no excess characters afther the end of a [[link]](here):
+const allowedExcess: string[] = ["s"]; //list of strings to add right after a value name, if the excess is outside the link ie [[human]]s -> [[humans]]
+function fixLinkProperty(properties: string) {
+	const excessArray: string[] = [];
+	const result = properties.replace(
+		/\[\[(?<linkValue>.*)\]\](?<excess>.+)/gm,
+		function replacer(match, linkValue, excess) {
+			if (excess) {
+				excessArray.push(excess);
+				return `[[${linkValue}${excess}]]`;
+			}
+			return match;
+		}
+	);
+	return result;
+}
 const unsupportedProperties = ["allignment"];
 const unsupportedPropertyValues = ["yes", "no"]; // consider allowing "yes" to allow sorting by linking into categories
 // Reformats properties (properties, body) and outputs properties as useable data(PropertyData[])
@@ -64,21 +79,22 @@ function fixProperties(article: string): {
 	properties: string;
 	propertyData: PropertyData[];
 } {
+	const propertyData: PropertyData[] = [];
 	const regexp = /^\|\s(?<name>.*?)\s+=\s(?<value>.*?)\s*$\n/gm;
 	const match = article.match(regexp);
 	if (!match) {
 		return { body: article, properties: "", propertyData: [] };
 	}
-	const totalMatches = match.length;
 	let matchIndex = 0;
-	const propertyData: PropertyData[] = [];
+	const totalMatches = match.length;
 	let result = article.replace(
 		regexp,
 		function replacer(match, name: CaptureValue, value: CaptureValue) {
 			//should eventually be refactored
 			matchIndex += 1;
+			//General checks for each value:
 			if (value) {
-				name = name.replaceAll(" ", "_"); // replaces spaces in the name with underscore
+				name = name.replaceAll(" ", "_"); // replaces spaces in the name with underscores
 			}
 			if (
 				!value ||
@@ -95,7 +111,9 @@ function fixProperties(article: string): {
 				return result;
 			}
 			const value_split = value.split(", ");
+
 			if (value_split.length === 1) {
+				// One value:
 				propertyData.push({ name, value });
 				let result = `${name}: ${value}\n`;
 				if (matchIndex === totalMatches) {
@@ -103,7 +121,7 @@ function fixProperties(article: string): {
 				}
 				return result;
 			}
-			// If more than one value:
+			// Multiple values:
 			propertyData.push({ name, value: value_split });
 			const multiline = value_split.map(function (value) {
 				return `  - ${value}`;
@@ -115,7 +133,7 @@ function fixProperties(article: string): {
 			return result;
 		}
 	);
-	const propertyResult = `---\nobsidianUIMode: preview\n${result}`; //TODO: decide on preferred UI mode
+	const propertyResult = `---\n${result}`; // insert "obsidianUIMode: preview\n" before result if wanted
 	const formatRegexp: RegExp =
 		/(?<Properties>^(?:---\n){1}(?:.*\n)*---\n)(?<Body>(?:.|\n)*)/m;
 	const formatMatch = propertyResult.match(formatRegexp);
@@ -131,12 +149,14 @@ function fixProperties(article: string): {
 		body = formatMatch?.groups.Body;
 		properties = formatMatch?.groups.Properties;
 	}
+	properties = fixLinkProperty(properties);
 	return {
 		body,
 		properties,
 		propertyData,
 	};
-} // fixes heading formating, i.e =content= -> #content
+}
+// fixes heading formating, i.e =content= -> #content
 function fixHeadings(article: string) {
 	const regexp = /(?<start>^=+)(?<content>.+?)(?:=+$)/gm;
 	return article.replaceAll(regexp, function replacer(match, start, content) {
@@ -162,10 +182,7 @@ export const parseArticle = function (article: string): {
 	body = fixTags(body);
 	writeFile(body, "tags", 1);
 	//Fix curly braces:
-	const {
-		result: fxbResult,
-		templateName
-	} = fixCurlyBraces(body);
+	const { result: fxbResult, templateName } = fixCurlyBraces(body);
 	body = fxbResult;
 	writeFile(body, "braces", 2);
 	//Fix properties:
