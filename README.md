@@ -5,6 +5,8 @@
 
 This plugin enables importing articles from the Forgotten Realms Wiki into your obsidian vault.
 
+Please do keep in mind currently the only category of infobox tables supported are "Location". In other words the visual infoboxes will only appear for locations for now.
+
 ## Requirements
 For the plugin to work correctly you must make sure you have the following plugins installed:
 
