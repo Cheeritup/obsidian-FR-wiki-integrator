@@ -16,6 +16,7 @@ export function fixCurlyBraces(article: string): {
 } {
 	const regexp = /{{(?<name>[/a-zA-Z0-9]*)(?<content>[^\n]*)}}\n/g; //does not remove {{}} in the middle of lines to support future implementations (quotes/cites)
 	let templateName: string = "";
+    article = quotesHandler(article).result
 	let result = article
 		.replaceAll(regexp, "")
 		.replace(
@@ -27,6 +28,5 @@ export function fixCurlyBraces(article: string): {
 		)
 		.replace(/^}}$\n/m, "")
 		.replace(/^}}/m, "");
-	result = quotesHandler(result).result;
 	return { result, templateName };
 }
