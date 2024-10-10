@@ -10,7 +10,7 @@ function quotesHandler(article: string) {
 	return { result, quotes };
 }
 // removes unneccesary {} tags(result), also returns the template name(templateName)
-function fixCurlyBraces(article: string): {
+export function fixCurlyBraces(article: string): {
 	result: string;
 	templateName: string;
 } {

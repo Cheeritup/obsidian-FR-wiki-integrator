@@ -2,6 +2,7 @@ import { PropertyData } from "TemplateBuilder/TemplateHandler";
 import * as fs from "fs";
 import { Notice } from "obsidian";
 import { getTemplateFromName } from "./TemplateHandlerIterator";
+import { fixCurlyBraces } from "./fixCurlyBraces";
 type CaptureValue = string;
 function writeFile(body: string, phase: string, num: number) {
 	if (process.env.DEBUG) {
