@@ -1,7 +1,7 @@
 {
 	"id": "FR-Wiki",
 	"name": "FR Wiki Integration plugin",
-	"version": "0.4.9.4",
+	"version": "0.4.9.5",
 	"minAppVersion": "0.15.0",
 	"description": "Allows importing articles from the Forgotten Realms wiki into Obsidian",
 	"author": "Cheeritup & co",

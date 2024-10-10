@@ -27,6 +27,9 @@ export default class FRWIntegrationPlugin extends Plugin {
 	async onload() {
 		// Quicklinks prefix check
 		const quickLinksSupport = await ensureQuickLinksSupport(this.app);
+		if (!quickLinksSupport){
+			new Notice (`"Quick Links" setup failed."`);
+		}
 		await this.loadSettings();
 		// This creates an icon in the left ribbon.
 		const ribbonIconEl = this.addRibbonIcon(

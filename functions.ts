@@ -4,6 +4,11 @@ const requiredPrefix = {
 	target: "https://forgottenrealms.fandom.com/wiki/%s",
 	wordSeparator: "",
 };
+const secondaryPrefix = {
+	prefix: "frwc",
+	target: "https://forgottenrealms.fandom.com/wiki/Category:%s",
+	wordSeparator: "",
+};
 interface QuickLinksPrefix {
 	prefix: string;
 	target: string;
@@ -16,10 +21,9 @@ export async function ensureQuickLinksSupport(app: App) {
 			new Notice(
 				"Error: Plugin QuickLinks not found. External links will be broken."
 			);
-			return;
+			return false;
 		}
 		const jsonData = await quickLinks.loadData();
-		// handle noquickLinks (notice + return)
 		const prefixes = jsonData.quickLinks as QuickLinksPrefix[];
 		if (
 			!prefixes.some((prefix) => prefix.prefix === requiredPrefix.prefix)
@@ -28,10 +32,19 @@ export async function ensureQuickLinksSupport(app: App) {
 			await quickLinks.saveData(jsonData);
 			await quickLinks.unload();
 			await quickLinks.load();
-		} return true
+		}
+		if (
+			!prefixes.some((prefix) => prefix.prefix === secondaryPrefix.prefix)
+		) {
+			prefixes.push(secondaryPrefix);
+			await quickLinks.saveData(jsonData);
+			await quickLinks.unload();
+			await quickLinks.load();
+		}
+		return true;
 	} catch (error) {
-		// prinToConsole(error)
+		console.error(error);
 		new Notice("Error fixing external Forgotten Realms links");
-		return false
+		return false;
 	}
 }
