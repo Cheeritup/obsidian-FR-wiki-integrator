@@ -27,7 +27,7 @@ export default class FRWIntegrationPlugin extends Plugin {
 	async onload() {
 		// Quicklinks prefix check
 		const quickLinksSupport = await ensureQuickLinksSupport(this.app);
-		if (!quickLinksSupport){
+		if (quickLinksSupport === false){
 			new Notice (`"Quick Links" setup failed."`);
 		}
 		await this.loadSettings();
