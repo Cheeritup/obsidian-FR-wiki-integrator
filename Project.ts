@@ -1,5 +1,4 @@
 import { PropertyData } from "TemplateBuilder/TemplateHandler";
-import { locationTemplateHandler } from "./TemplateBuilder/InfoboxTemplateHandler";
 import * as fs from "fs";
 import { Notice } from "obsidian";
 import { getTemplateFromName } from "./TemplateHandlerIterator";
@@ -33,27 +32,6 @@ function fixTags(article: string) {
 			return match;
 		}
 	);
-}
-
-// removes unneccesary {} tags(result), also returns the template name(templateName)
-function fixCurlyBraces(article: string): {
-	result: string;
-	templateName: string;
-} {
-	const regexp = /{{(?<name>[/a-zA-Z0-9]*)(?<content>[^\n]*)}}\n/g; //does not remove {{}} in the middle of lines to support future implementations (quotes/cites)
-	let templateName: string = "";
-	const result = article
-		.replaceAll(regexp, "")
-		.replace(
-			/^{{(?<template>.*)\n/,
-			function replacer(match, template: string) {
-				templateName = template;
-				return "";
-			}
-		)
-		.replace(/^}}$\n/m, "")
-		.replace(/^}}/m, "");
-	return { result, templateName };
 }
 //makes sure there is no excess characters afther the end of a [[link]](here):
 const allowedExcess: string[] = ["s"]; //list of strings to add right after a value name, if the excess is outside the link ie [[human]]s -> [[humans]]
@@ -177,13 +155,14 @@ export const parseArticle = function (article: string): {
 	parsedArticle: string;
 	title: string;
 } {
+	//Ensures compatibility and consistency in formatting:
 	let body = article.replace(/\r/g, "");
 	//Fix tags:
 	body = fixTags(body);
 	writeFile(body, "tags", 1);
 	//Fix curly braces:
-	const { result: fxbResult, templateName } = fixCurlyBraces(body);
-	body = fxbResult;
+	const { result: fixCurlyBracesResult, templateName } = fixCurlyBraces(body);
+	body = fixCurlyBracesResult;
 	writeFile(body, "braces", 2);
 	//Fix properties:
 	const {
