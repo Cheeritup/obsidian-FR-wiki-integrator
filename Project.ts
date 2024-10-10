@@ -137,6 +137,7 @@ function fixProperties(article: string): {
 }
 // fixes heading formating, i.e =content= -> #content
 function fixHeadings(article: string) {
+	article = article.replaceAll(/:;/gm, "#### ");
 	const regexp = /(?<start>^=+)(?<content>.+?)(?:=+$)/gm;
 	return article.replaceAll(regexp, function replacer(match, start, content) {
 		return `${start.replaceAll("=", "#")} ${content}`;
