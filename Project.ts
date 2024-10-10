@@ -50,7 +50,7 @@ function fixLinkProperty(properties: string) {
 	);
 	return result;
 }
-const unsupportedProperties = ["allignment"];
+const unsupportedProperties = ["allignment", "useon"];
 const unsupportedPropertyValues = ["yes", "no"]; // consider allowing "yes" to allow sorting by linking into categories
 // Reformats properties (properties, body) and outputs properties as useable data(PropertyData[])
 function fixProperties(article: string): {
@@ -80,7 +80,7 @@ function fixProperties(article: string): {
 				unsupportedProperties.includes(name) ||
 				unsupportedPropertyValues.includes(value)
 			) {
-				if (value) {
+				if (value && !unsupportedProperties.includes(name)) {
 					propertyData.push({ name, value });
 				}
 				let result = "";
